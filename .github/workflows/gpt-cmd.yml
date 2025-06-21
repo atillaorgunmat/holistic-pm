@@ -22,9 +22,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "⏳ Extracting GPT-CMD lines from issue body…"
-          DIRECTIVES=$(printf "%s\n" "${{ github.event.issue.body }}" \
-            | grep -E '^UPDATE|^CREATE|^CLOSE' || true)
-
+          DIRECTIVES=$(printf "%s\n" "${{ github.event.issue.body }}" | grep -E '^UPDATE|^CREATE|^CLOSE' || true)
           if [ -z "$DIRECTIVES" ]; then
             echo "✅ No GPT-CMD directives found → skipping."
             exit 0
