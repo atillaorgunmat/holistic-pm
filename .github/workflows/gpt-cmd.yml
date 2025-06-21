@@ -4,6 +4,10 @@ on:
   issues:
     types: [opened, edited, reopened]
 
+permissions:
+  contents: write   # allows git push from workflow
+  issues: write     # allows issue updates/comments if needed
+
 jobs:
   parse-and-apply:
     if: contains(github.event.issue.title, '[GPT-CMD]')
@@ -16,7 +20,7 @@ jobs:
         env:
           CMD_BODY: ${{ github.event.issue.body }}
         run: |
-          # Append the raw issue body to Tasks.md (safe for quotes & parens)
+          # Safely append body to Tasks.md
           printf '%s\n' "$CMD_BODY" >> Tasks.md
 
           git config user.name "gpt-automation"
