@@ -29,3 +29,51 @@ PH-03  Validation
 PH-04  Handover
 │
 └─ *(to be detailed)*
+UPDATE Tasks.md
+pattern: "T-0001.[Open]"
+replacement: "T-0001 Initialise repository skeleton [Done]"
+UPDATE Tasks.md
+pattern: "T-0002.[Open]"
+replacement: "T-0002 Configure GitHub Actions (blockers, summary, impact) [Done]"
+UPDATE Tasks.md
+pattern: "T-0003.[Open]"
+replacement: "T-0003 Draft Governance.md baseline [Done]"
+UPDATE Tasks.md
+pattern: "T-0004.[Open]"
+replacement: "T-0004 Establish Issue template & GPT-CMD pipeline [Done]"
+CREATE issue
+title: "[TASK] T-0005 Snapshot generator validation"
+labels: ["task", "task:open"]
+body: |
+Task-ID: T-0005
+Description: Validate that the daily summary.yml workflow writes a file to Snapshots/YYYY-MM-DD.md and commits without errors.
+Effort: ≤ 6 h
+Exit-Criteria: Snapshot file exists and commit is green.
+CREATE issue
+title: "[TASK] T-0006 Clarify templates & example"
+labels: ["task", "task:open"]
+body: |
+Task-ID: T-0006
+Description: Add an example filled-in ISSUE_TEMPLATE/task.yml in /docs/examples/ and reference it in Governance.md.
+Effort: ≤ 6 h
+CREATE issue
+title: "[TASK] T-0007 Phase-Gate checklist & labels"
+labels: ["task", "task:open"]
+body: |
+Task-ID: T-0007
+Description: Create label set phase:pending-review, phase:approved; embed checklist table in Governance.md.
+Effort: ≤ 6 h
+CREATE issue
+title: "[TASK] T-0008 Disaster-Recovery script"
+labels: ["task", "task:open"]
+body: |
+Task-ID: T-0008
+Description: Flesh out scripts/restore_ctx.ps1 to restore latest snapshot and reopen any risk:blocker tasks.
+Effort: ≤ 6 h
+CREATE issue
+title: "[TASK] T-0009 Weekly cleanup Action"
+labels: ["task", "task:open"]
+body: |
+Task-ID: T-0009
+Description: Ensure cleanup.yml archives stale Work-Stream issues; test via workflow_dispatch.
+Effort: ≤ 6 h
