@@ -1,0 +1,17 @@
+name: Daily Blocker Scan
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # 09:00 Europe/Istanbul
+
+jobs:
+  blocker-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan blockers
+        run: |
+          grep -r "\[blocked\]" Tasks.md || exit 0
+          gh issue create --title "🚨 Daily Blockers Identified" --body "$(grep -r "\[blocked\]" Tasks.md)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

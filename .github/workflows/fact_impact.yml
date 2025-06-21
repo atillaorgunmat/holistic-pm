@@ -1,0 +1,21 @@
+name: Fact Impact Checker
+
+on:
+  push:
+    paths:
+      - FactLog.md
+
+jobs:
+  check-impact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fact Impact Scan
+        run: |
+          CHANGED_FACT=$(git diff HEAD~1 HEAD FactLog.md | grep '^+' | sed 's/^+//')
+          if [ -n "$CHANGED_FACT" ]; then
+            IMPACTED=$(grep -rl "$CHANGED_FACT" Tasks.md || echo "No impacted tasks.")
+            gh issue create --title "📝 Impact Check" --body "Fact: $CHANGED_FACT\n\nImpacted Tasks:\n$IMPACTED"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

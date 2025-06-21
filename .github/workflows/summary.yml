@@ -1,0 +1,22 @@
+name: Daily Summary Snapshot
+
+on:
+  schedule:
+    - cron: '0 18 * * *' # 21:00 Europe/Istanbul
+
+jobs:
+  daily-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Snapshot
+        run: |
+          mkdir -p Snapshots
+          SNAPSHOT_FILE="Snapshots/$(date '+%Y-%m-%d').md"
+          echo "# Daily Snapshot - $(date '+%Y-%m-%d')" > "$SNAPSHOT_FILE"
+          echo "## Current Task Status" >> "$SNAPSHOT_FILE"
+          cat Tasks.md >> "$SNAPSHOT_FILE"
+          git config user.name "actions-bot"
+          git config user.email "actions-bot@github.com"
+          git add "$SNAPSHOT_FILE"
+          git commit -m "Snapshot for $(date '+%Y-%m-%d')" && git push || echo "No changes"

@@ -1,0 +1,19 @@
+name: ChatGPT Command Parser
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  parse-and-apply:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.title, '[GPT-CMD]')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply GPT Command
+        run: |
+          echo "${{ github.event.issue.body }}" >> Tasks.md
+          git config user.name "gpt-automation"
+          git config user.email "gpt-automation@github.com"
+          git commit -am "GPT Command executed from issue #${{ github.event.issue.number }}"
+          git push
