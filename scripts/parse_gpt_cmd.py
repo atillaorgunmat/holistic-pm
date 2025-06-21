@@ -1,43 +1,25 @@
-import os, re, subprocess, yaml, textwrap, pathlib
+#!/usr/bin/env python3
+import json, re, sys, pathlib
 
-# Read the raw issue body
-body = os.environ.get("CMD_BODY", "")
-print(">>> CMD_BODY START <<<")
-print(body)
-print(">>> CMD_BODY END   <<<\n")
-blocks = [b.strip() for b in body.split('---') if b.strip()]
+event_path, tasks_path = sys.argv[1], sys.argv[2]
 
-for block in blocks:
-    if block.startswith("UPDATE"):
-        header, *rest = block.splitlines()
-        target = header.split()[1]
-        pat = rep = ""
-        for line in rest:
-            stripped = line.strip()
-            if stripped.startswith("pattern:"):
-                pat = stripped.split(":",1)[1].strip().strip('"')
-            elif stripped.startswith("replacement:"):
-                rep = stripped.split(":",1)[1].strip().strip('"')
-        print(f"[DEBUG] Trying UPDATE on {target!r} with pattern={pat!r} → replacement={rep!r}")        
-        if pat and rep:
-            text = pathlib.Path(target).read_text(encoding="utf-8")
-            # --- DEBUG: show the first matching candidate line ----------
-            for ln in text.splitlines():
-                if "HELLO" in ln:
-                    print("[LINE]", repr(ln))          # python repr shows escapes
-                    print("[ORDS]", [ord(c) for c in ln])
-                    break
-# ------------------------------------------------------------
-            text = re.sub(pat, rep, text, flags=re.M)
-            pathlib.Path(target).write_text(text, encoding="utf-8")
+# Load issue body from GitHub event payload
+with open(event_path, "r", encoding="utf-8") as f:
+    body = json.load(f)["issue"]["body"]
 
-    elif block.startswith("CREATE issue"):
-        meta, _, body_block = block.partition("body:")
-        spec = yaml.safe_load(meta.replace("CREATE issue",""))
-        title  = spec["title"]
-        labels = spec.get("labels", [])
-        label_flags = sum([["--label", l] for l in labels], [])
-        subprocess.run(
-            ["gh","issue","create","--title",title,*label_flags,"--body",textwrap.dedent(body_block)],
-            check=True
-        )
+# Extract directive lines (UPDATE, CREATE, CLOSE, pattern:, replacement:)
+lines = []
+for ln in body.splitlines():
+    if re.match(r"^[ \t]*(UPDATE|CREATE|CLOSE|pattern:|replacement:)", ln):
+        lines.append(ln.rstrip())
+
+# Append extracted lines to Tasks.md
+if lines:
+    with open(tasks_path, "a", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print("Appended the following lines to Tasks.md:")
+    for line in lines:
+        print(line)
+else:
+    print("No directive lines found.")
+    sys.exit(0)
