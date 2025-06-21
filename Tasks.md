@@ -30,16 +30,3 @@ PH-03  Validation
 PH-04  Handover  
 │  
 └─ *(to be detailed)* 
-
-UPDATE debug/regex-test.md
-UPDATE debug/regex-test.md
-UPDATE debug/regex-test.md
-UPDATE debug/regex-test.md
-pattern: "^\s*T-9999\s+.*\[Open\]"
-replacement: "T-9999  Dummy task  [Done]"
-UPDATE debug/regex-test.md
-pattern: "^\s*T-9999\s+.*\[Open\]"
-replacement: "T-9999  Dummy task  [Done]"
-UPDATE debug/regex-test.md
-pattern: "^\s*T-9999\s+.*\[Open\]"
-replacement: "T-9999  Dummy task  [Done]"
