@@ -1,54 +1,55 @@
-# --- Create live PH-00 task issues ---
-CREATE issue
-title: "[TASK] T-0005 Create first snapshot generator"
-labels: ["task", "task:open"]
-body: |
-  **Task-ID:** T-0005  
-  **Description:** Create and validate the snapshot generator (`summary.yml`) so that `Snapshots/YYYY-MM-DD.md` is produced and committed.  
-  **Effort:** ≤ 6 h  
-  **Exit-Criteria:** Workflow run green; snapshot file present in `main`.
+# File: .github/workflows/gpt-cmd.yml
+name: ChatGPT Command Parser
 
-CREATE issue
-title: "[TASK] T-0006 Clarify templates & add example"
-labels: ["task", "task:open"]
-body: |
-  **Task-ID:** T-0006  
-  **Description:** Add a fully filled example of `ISSUE_TEMPLATE/task.yml` under `docs/examples/` and link it from `Governance.md`.  
-  **Effort:** ≤ 6 h  
-  **Exit-Criteria:** Example committed; docs updated.
+on:
+  issues:
+    types: [opened]
 
-CREATE issue
-title: "[TASK] T-0007 Insert Phase-Gate checklist & labels"
-labels: ["task", "task:open"]
-body: |
-  **Task-ID:** T-0007  
-  **Description:** Define labels `phase:pending-review` and `phase:approved`; embed a Phase-Gate checklist in `Governance.md`.  
-  **Effort:** ≤ 6 h  
-  **Exit-Criteria:** Labels exist; checklist merged.
+permissions:
+  contents: write
 
-CREATE issue
-title: "[TASK] T-0008 Add Disaster-Recovery note & script"
-labels: ["task", "task:open"]
-body: |
-  **Task-ID:** T-0008  
-  **Description:** Flesh out `scripts/restore_ctx.ps1` to restore the latest snapshot and reopen any `risk:blocker` tasks; document usage in `Governance.md`.  
-  **Effort:** ≤ 6 h  
-  **Exit-Criteria:** Script tested; documentation updated.
+jobs:
+  parse-and-apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
-CREATE issue
-title: "[TASK] T-0009 Create weekly cleanup Action"
-labels: ["task", "task:open"]
-body: |
-  **Task-ID:** T-0009  
-  **Description:** Ensure `cleanup.yml` archives stale Work-Stream Issues; verify via manual `workflow_dispatch`.  
-  **Effort:** ≤ 6 h  
-  **Exit-Criteria:** Dispatch passes; stale Issues labeled `archived`.
+      - name: Parse and apply GPT-CMD directives
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "⏳ Extracting GPT-CMD lines from issue body…"
+          DIRECTIVES=$(printf "%s\n" "${{ github.event.issue.body }}" \
+            | grep -E '^UPDATE|^CREATE|^CLOSE' || true)
 
-CREATE issue
-title: "[TASK] T-0010 Implement GPT-CMD parser (auto-exec UPDATE/CREATE)"
-labels: ["task", "task:open"]
-body: |
-  **Task-ID:** T-0010  
-  **Description:** Finalize `scripts/parse_gpt_cmd.py` so patterns are auto-escaped (`re.escape`) unless prefixed with `r"…"`, and remove sandbox debug prints.  
-  **Effort:** ≤ 6 h  
-  **Exit-Criteria:** Unit test validates literal-pattern update; docs aligned; CI green.
+          if [ -z "$DIRECTIVES" ]; then
+            echo "✅ No GPT-CMD directives found → skipping."
+            exit 0
+          fi
+
+          echo "➡️  Applying the following directives:"
+          printf "%s\n\n" "$DIRECTIVES"
+
+          printf "%s\n" "$DIRECTIVES" | while read -r line; do
+            case "$line" in
+              UPDATE*)
+                echo "$line" >> Tasks.md
+                ;;
+              CREATE*|CLOSE*)
+                echo "$line"
+                ;;
+            esac
+          done
+
+          git config user.name "gpt-automation"
+          git config user.email "gpt-automation@github.com"
+          git add Tasks.md
+          if git diff --cached --quiet; then
+            echo "✅ No changes to Tasks.md → skipping commit."
+          else
+            git commit -m "GPT Command executed from issue #${{ github.event.issue.number }}"
+            git push
+          fi
