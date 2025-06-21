@@ -15,53 +15,42 @@ steps:
 with:
 token: \${{ secrets.GITHUB\_TOKEN }}
 persist-credentials: true
-
-```
-  # ─── Quick sanity check ───────────────────────────────────
-  - name: Quick regex sanity-check
-    run: sh -xc 'printf "%s\n" "UPDATE foo" | grep -E "^UPDATE"'
-
-  # ─── Main parser with raw-body debug ────────────────────
-  - name: Parse and apply GPT-CMD directives
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    run: |
-      # Debug: dump the exact issue body from the event payload
-      echo "⏳ Extracting raw event body…"
-      BODY=$(jq -r .issue.body "$GITHUB_EVENT_PATH")
-      echo "----- RAW EVENT BODY START -----"
-      echo "$BODY"
-      echo "----- RAW EVENT BODY END -----"
-
-      # Process directives (capture UPDATE, pattern:, replacement:, CREATE, CLOSE)
-      DIRECTIVES=$(printf '%s\n' "$BODY" | grep -E '^[[:space:]]*(UPDATE|pattern:|replacement:|CREATE|CLOSE)' || true)
-      if [ -z "$DIRECTIVES" ]; then
-        echo "✅ No GPT-CMD directives found → skipping."
-        exit 0
-      fi
-
-      echo "➡️  Applying the following directives:"
-      printf '%s\n' "$DIRECTIVES"  # show captured lines
-
-      # Apply each captured directive line to the repo
-      printf '%s\n' "$DIRECTIVES" | while read -r line; do
-        case "$line" in
-          UPDATE*|pattern:*|replacement:*)
-            printf '%s\n' "$line" >> Tasks.md
-            ;;
-          CREATE*|CLOSE*)
-            printf '%s\n' "$line"
-            ;;
-        esac
-      done
-
-      git config user.name "gpt-automation"
-      git config user.email "gpt-automation@github.com"
-      git add Tasks.md
-      if git diff --cached --quiet; then
-        echo "✅ No changes to Tasks.md → skipping commit."
-      else
-        git commit -m "GPT Command executed from issue #${{ github.event.issue.number }}"
-        git push
-      fi
-```
+\# Quick sanity check
+\- name: Quick regex sanity-check
+run: sh -xc 'printf "%s\n" "UPDATE foo" | grep -E "^UPDATE"'
+\# Main parser with raw-body debug
+\- name: Parse and apply GPT-CMD directives
+env:
+GITHUB\_TOKEN: \${{ secrets.GITHUB\_TOKEN }}
+run: |
+echo "⏳ Extracting raw event body…"
+BODY=\$(jq -r .issue.body "\$GITHUB\_EVENT\_PATH")
+echo "----- RAW EVENT BODY START -----"
+echo "\$BODY"
+echo "----- RAW EVENT BODY END -----"
+DIRECTIVES=\$(printf '%s\n' "\$BODY" | grep -E '^\[\[:space:]]*(UPDATE|pattern:|replacement:|CREATE|CLOSE)' || true)
+if \[ -z "\$DIRECTIVES" ]; then
+echo "✅ No GPT-CMD directives found → skipping."
+exit 0
+fi
+echo "➡️  Applying the following directives:"
+printf '%s\n' "\$DIRECTIVES"
+printf '%s\n' "\$DIRECTIVES" | while read -r line; do
+case "\$line" in
+UPDATE*|pattern:*|replacement:*)
+printf '%s\n' "\$line" >> Tasks.md
+;;
+CREATE\*|CLOSE\*)
+printf '%s\n' "\$line"
+;;
+esac
+done
+git config user.name "gpt-automation"
+git config user.email "[gpt-automation@github.com](mailto:gpt-automation@github.com)"
+git add Tasks.md
+if git diff --cached --quiet; then
+echo "✅ No changes to Tasks.md → skipping commit."
+else
+git commit -m "GPT Command executed from issue #\${{ github.event.issue.number }}"
+git push
+fi
