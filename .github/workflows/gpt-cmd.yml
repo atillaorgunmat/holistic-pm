@@ -15,10 +15,9 @@ steps:
 with:
 token: \${{ secrets.GITHUB\_TOKEN }}
 persist-credentials: true
-\# Quick sanity check
 \- name: Quick regex sanity-check
-run: sh -xc 'printf "%s\n" "UPDATE foo" | grep -E "^UPDATE"'
-\# Main parser with raw-body debug
+run: |
+sh -xc 'printf "%s\n" "UPDATE foo" | grep -E "^UPDATE"'
 \- name: Parse and apply GPT-CMD directives
 env:
 GITHUB\_TOKEN: \${{ secrets.GITHUB\_TOKEN }}
