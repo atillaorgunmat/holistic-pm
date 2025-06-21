@@ -5,8 +5,8 @@ on:
     types: [opened, edited, reopened]
 
 permissions:
-  contents: write   # allows git push from workflow
-  issues: write     # allows issue updates/comments if needed
+  contents: write
+  issues:   write
 
 jobs:
   parse-and-apply:
@@ -19,10 +19,12 @@ jobs:
       - name: Apply GPT Command
         env:
           CMD_BODY: ${{ github.event.issue.body }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Safely append body to Tasks.md
-          printf '%s\n' "$CMD_BODY" >> Tasks.md
+          python scripts/parse_gpt_cmd.py
 
+      - name: Commit & Push
+        run: |
           git config user.name "gpt-automation"
           git config user.email "gpt-automation@github.com"
           git commit -am "GPT Command executed from issue #${{ github.event.issue.number }}" || true
