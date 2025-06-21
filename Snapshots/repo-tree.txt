@@ -1,0 +1,15 @@
+.github/ISSUE_TEMPLATE/task.yml
+.github/workflows/blockers.yml
+.github/workflows/cleanup.yml
+.github/workflows/fact_impact.yml
+.github/workflows/gpt-cmd.yml
+.github/workflows/summary.yml
+.gitignore
+FactLog.md
+Governance.md
+Snapshots/.gitkeep
+Tasks.md
+sandbox.txt
+scripts/parse_gpt_cmd.py
+scripts/restore_ctx.ps1
+test.txt
