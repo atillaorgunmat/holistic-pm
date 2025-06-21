@@ -21,6 +21,13 @@ for block in blocks:
         print(f"[DEBUG] Trying UPDATE on {target!r} with pattern={pat!r} → replacement={rep!r}")        
         if pat and rep:
             text = pathlib.Path(target).read_text(encoding="utf-8")
+            # --- DEBUG: show the first matching candidate line ----------
+            for ln in text.splitlines():
+                if "HELLO" in ln:
+                    print("[LINE]", repr(ln))          # python repr shows escapes
+                    print("[ORDS]", [ord(c) for c in ln])
+                    break
+# ------------------------------------------------------------
             text = re.sub(pat, rep, text, flags=re.M)
             pathlib.Path(target).write_text(text, encoding="utf-8")
 
