@@ -22,9 +22,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "⏳ Extracting GPT-CMD lines from issue body…"
-          # Allow grep to “fail” without aborting the script
-          DIRECTIVES=$(printf "%s\n" "${{ github.event.issue.body }}" | \
-            grep -E '^(UPDATE|CREATE|CLOSE)' || true)
+          # Grab only lines starting with UPDATE, CREATE or CLOSE
+          DIRECTIVES=$(printf "%s\n" "${{ github.event.issue.body }}" \
+            | grep -E '^UPDATE|^CREATE|^CLOSE' || true)
 
           if [ -z "$DIRECTIVES" ]; then
             echo "✅ No GPT-CMD directives found → skipping."
@@ -34,22 +34,19 @@ jobs:
           echo "➡️  Applying the following directives:"
           printf "%s\n\n" "$DIRECTIVES"
 
-          # Apply UPDATE directives to Tasks.md (this is a stub; adjust as needed)
+          # Stubbed implementation: echo UPDATE into Tasks.md, echo others
           printf "%s\n" "$DIRECTIVES" | while read -r line; do
             case "$line" in
               UPDATE*)
                 echo "$line" >> Tasks.md
                 ;;
-              CREATE*)
-                echo "$line"
-                ;;
-              CLOSE*)
+              CREATE*|CLOSE*)
                 echo "$line"
                 ;;
             esac
           done
 
-          # Commit & push only if Tasks.md changed
+          # Commit & push if Tasks.md changed
           git config user.name "gpt-automation"
           git config user.email "gpt-automation@github.com"
           git add Tasks.md
