@@ -16,7 +16,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           persist-credentials: true
-
+      - name: Quick regex sanity-check
+        run: sh -xc 'printf "%s\n" "UPDATE foo" | grep -E "^UPDATE"'
       - name: Parse and apply GPT-CMD directives
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
