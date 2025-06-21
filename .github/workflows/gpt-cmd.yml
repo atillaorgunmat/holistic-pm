@@ -23,8 +23,8 @@ jobs:
         run: |
           echo "⏳ Extracting GPT-CMD lines from issue body…"
           # Allow grep to “fail” without aborting the script
-          DIRECTIVES=$(printf "%s\n" "${{ github.event.issue.body }}" \
-            | grep -E '^(UPDATE|CREATE|CLOSE)' || true)
+          DIRECTIVES=$(printf "%s\n" "${{ github.event.issue.body }}" | \
+            grep -E '^(UPDATE|CREATE|CLOSE)' || true)
 
           if [ -z "$DIRECTIVES" ]; then
             echo "✅ No GPT-CMD directives found → skipping."
