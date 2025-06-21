@@ -22,7 +22,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "⏳ Extracting GPT-CMD lines from issue body…"
-          DIRECTIVES=$(printf "%s\n" "${{ github.event.issue.body }}" | grep -E '^(UPDATE|CREATE|CLOSE)')
+          # Allow grep to “fail” without aborting the script
+          DIRECTIVES=$(printf "%s\n" "${{ github.event.issue.body }}" \
+            | grep -E '^(UPDATE|CREATE|CLOSE)' || true)
+
           if [ -z "$DIRECTIVES" ]; then
             echo "✅ No GPT-CMD directives found → skipping."
             exit 0
@@ -31,24 +34,17 @@ jobs:
           echo "➡️  Applying the following directives:"
           printf "%s\n\n" "$DIRECTIVES"
 
-          # Apply UPDATE directives to Tasks.md
+          # Apply UPDATE directives to Tasks.md (this is a stub; adjust as needed)
           printf "%s\n" "$DIRECTIVES" | while read -r line; do
             case "$line" in
               UPDATE*)
-                # Extract the pattern & replacement parts
-                # Format: UPDATE Tasks.md<newline>pattern: "...“<newline>replacement: "..."
-                # Use a simple awk/sed pipeline or call a helper script here.
-                # For now, just append the UPDATE block for manual review:
                 echo "$line" >> Tasks.md
                 ;;
               CREATE*)
-                # You could invoke gh CLI here:
-                # echo "$line" | gh issue create --title "$(…)" --body "$(…)"
-                echo "$line" # stub
+                echo "$line"
                 ;;
               CLOSE*)
-                # echo "$line" | gh issue close $(…)
-                echo "$line" # stub
+                echo "$line"
                 ;;
             esac
           done
