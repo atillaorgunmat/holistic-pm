@@ -2,24 +2,24 @@ name: ChatGPT Command Parser
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited, reopened]
 
 jobs:
   parse-and-apply:
-    runs-on: ubuntu-latest
     if: contains(github.event.issue.title, '[GPT-CMD]')
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - name: Apply GPT Command
         env:
           CMD_BODY: ${{ github.event.issue.body }}
         run: |
-          # Append raw body safely without shell interpreting its quotes
-          cat >> Tasks.md <<'EOF'
-$CMD_BODY
-EOF
+          # Append the raw issue body to Tasks.md (safe for quotes & parens)
+          printf '%s\n' "$CMD_BODY" >> Tasks.md
 
           git config user.name "gpt-automation"
           git config user.email "gpt-automation@github.com"
-          git commit -am "GPT Command executed from issue #${{ github.event.issue.number }}"
+          git commit -am "GPT Command executed from issue #${{ github.event.issue.number }}" || true
           git push
