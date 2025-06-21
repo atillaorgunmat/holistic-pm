@@ -2,30 +2,23 @@ name: ChatGPT Command Parser
 
 on:
   issues:
-    types: [opened, edited, reopened]
-
-permissions:
-  contents: write
-  issues:   write
+    types: [opened]
 
 jobs:
   parse-and-apply:
-    if: contains(github.event.issue.title, '[GPT-CMD]')
     runs-on: ubuntu-latest
-
+    if: contains(github.event.issue.title, '[GPT-CMD]')
     steps:
       - uses: actions/checkout@v4
-
       - name: Apply GPT Command
-        env:
-          CMD_BODY: ${{ github.event.issue.body }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/parse_gpt_cmd.py
-
-      - name: Commit & Push
-        run: |
+          echo "${{ github.event.issue.body }}" >> Tasks.md
           git config user.name "gpt-automation"
           git config user.email "gpt-automation@github.com"
-          git commit -am "GPT Command executed from issue #${{ github.event.issue.number }}" || true
-          git push
+          git add Tasks.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit → skipping."
+          else
+            git commit -m "GPT Command executed from issue #${{ github.event.issue.number }}"
+            git push
+          fi
