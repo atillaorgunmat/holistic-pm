@@ -1,7 +1,7 @@
 name: Task Creation
 description: Structured template for new tasks
 title: "[TASK] - <short description>"
-labels: ["task"]
+labels: ["task:open"]
 body:
   - type: input
     id: task-id
@@ -10,6 +10,7 @@ body:
       placeholder: "T-000X"
     validations:
       required: true
+
   - type: textarea
     id: task-desc
     attributes:
@@ -17,6 +18,7 @@ body:
       placeholder: "Provide a detailed description."
     validations:
       required: true
+
   - type: dropdown
     id: task-size
     attributes:
@@ -26,6 +28,7 @@ body:
         - ">6h"
     validations:
       required: true
+
   - type: input
     id: parent-task
     attributes:

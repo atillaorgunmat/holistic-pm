@@ -2,7 +2,7 @@ name: Daily Blocker Scan
 
 on:
   schedule:
-    - cron: '0 6 * * *' # 09:00 Europe/Istanbul
+    - cron: '0 6 * * *'  # 09:00 Europe/Istanbul
 
 jobs:
   blocker-scan:
@@ -11,7 +11,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Scan blockers
         run: |
-          grep -r "\[blocked\]" Tasks.md || exit 0
-          gh issue create --title "🚨 Daily Blockers Identified" --body "$(grep -r "\[blocked\]" Tasks.md)"
+          # runs daily and targets issues labelled risk:blocker
+          gh issue list --label risk:blocker --state open --json title,number,html_url \
+            | jq -r '.[] | "- [#\(.number)](\(.html_url)) \(.title)"' > blockers.tmp
+          [ -s blockers.tmp ] || exit 0
+          gh issue create --title "🚨 Blockers Detected $(date '+%Y-%m-%d')" \
+                          --body "$(cat blockers.tmp)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

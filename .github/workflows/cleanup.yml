@@ -1,0 +1,17 @@
+name: Weekly Cleanup
+on:
+  schedule:
+    - cron: '0 2 * * 1'           # 02:00 UTC every Monday
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Close stale Work-Stream issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue list --label work-stream --state closed --limit 100 \
+            --json number,updatedAt |
+            jq -c '.[] | select((now - (.updatedAt|fromdateiso8601)) > 1209600) | .number' |
+            xargs -r -I % gh issue edit % --add-label archived
