@@ -1,3 +1,4 @@
+# File: .github/workflows/gpt-cmd.yml
 name: ChatGPT Command Parser
 
 on:
@@ -11,6 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Apply GPT Command
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # ← add this block
         run: |
           echo "${{ github.event.issue.body }}" >> Tasks.md
           git config user.name "gpt-automation"
