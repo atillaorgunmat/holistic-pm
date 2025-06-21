@@ -11,8 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Apply GPT Command
+        env:
+          CMD_BODY: ${{ github.event.issue.body }}
         run: |
-          echo "${{ github.event.issue.body }}" >> Tasks.md
+          # Append raw body safely without shell interpreting its quotes
+          cat >> Tasks.md <<'EOF'
+$CMD_BODY
+EOF
+
           git config user.name "gpt-automation"
           git config user.email "gpt-automation@github.com"
           git commit -am "GPT Command executed from issue #${{ github.event.issue.number }}"
