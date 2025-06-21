@@ -8,12 +8,16 @@ on:
 jobs:
   parse-and-apply:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write          # grant push permissions
     if: contains(github.event.issue.title, '[GPT-CMD]')
     steps:
       - uses: actions/checkout@v4
-      - name: Apply GPT Command
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true     
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # ← add this block
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "${{ github.event.issue.body }}" >> Tasks.md
           git config user.name "gpt-automation"
