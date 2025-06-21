@@ -33,18 +33,17 @@ jobs:
           echo "----- RAW EVENT BODY END -----"
 
           # Process directives
-          DIRECTIVES=$(printf "%s\n" "$BODY" | grep -E '^[[:space:]]*(UPDATE|CREATE|CLOSE)' || true)
+          DIRECTIVES=$(printf "%s\n" "$BODY" \
+           | grep -E '^[[:space:]]*(UPDATE|pattern:|replacement:|CREATE|CLOSE)' || true)
           if [ -z "$DIRECTIVES" ]; then
             echo "✅ No GPT-CMD directives found → skipping."
             exit 0
           fi
 
           echo "➡️  Applying the following directives:"
-          printf "%s\n\n" "$DIRECTIVES"
-
           printf "%s\n" "$DIRECTIVES" | while read -r line; do
             case "$line" in
-              UPDATE*)
+              UPDATE*|pattern:*|replacement:*)
                 echo "$line" >> Tasks.md
                 ;;
               CREATE*|CLOSE*)
@@ -52,6 +51,7 @@ jobs:
                 ;;
             esac
           done
+          
 
           git config user.name "gpt-automation"
           git config user.email "gpt-automation@github.com"
