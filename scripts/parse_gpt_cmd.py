@@ -2,6 +2,9 @@ import os, re, subprocess, yaml, textwrap, pathlib
 
 # Read the raw issue body
 body = os.environ.get("CMD_BODY", "")
+print(">>> CMD_BODY START <<<")
+print(body)
+print(">>> CMD_BODY END   <<<\n")
 blocks = [b.strip() for b in body.split('---') if b.strip()]
 
 for block in blocks:
@@ -15,6 +18,7 @@ for block in blocks:
                 pat = stripped.split(":",1)[1].strip().strip('"')
             elif stripped.startswith("replacement:"):
                 rep = stripped.split(":",1)[1].strip().strip('"')
+        print(f"[DEBUG] Trying UPDATE on {target!r} with pattern={pat!r} → replacement={rep!r}")        
         if pat and rep:
             text = pathlib.Path(target).read_text(encoding="utf-8")
             text = re.sub(pat, rep, text, flags=re.M)
